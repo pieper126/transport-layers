@@ -1,0 +1,4 @@
+*.out
+
+client/zig-out/
+client/.zig-cache/
