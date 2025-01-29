@@ -2,13 +2,14 @@
 #include <stdatomic.h>
 #include <stdio.h>
 #include <string.h>
-#include <threads.h>
+#include <unistd.h>
 
-#define MESSAGE_TO_SENT 1
+#define MESSAGE_TO_SENT 100
 
-const char *topic = "test/topicz";
-const char *message = "{ \"json\": \"test\" }";
-int qos = 2;
+const char *topic = "test/topic";
+//const char *message = "{ \"json\": \"test\" }";
+const char *message = "{ \"json\": \"test asdfasdfjakjlsdfhalksjdfhsakljdfhsalkdhfalskjdhfsakljdfhaslkjdfhsalkjdhflkasjdhflaskjdfhdskaljhfkljhafdjlkasfkhsadhjfl\" }";
+int qos = 1;
 int keepalive = 60;
 
 void on_message_print(struct mosquitto *client, void *userdata,
@@ -36,6 +37,7 @@ int main() {
   if (err != MOSQ_ERR_SUCCESS) {
     printf("error connecting to broker");
     mosquitto_lib_cleanup();
+    return -1;
   }
   // printf("2");
 
@@ -59,15 +61,17 @@ int main() {
 
   for (int i = 0; i < MESSAGE_TO_SENT; i++) {
     int rc = mosquitto_publish(publisher, NULL, topic, strlen(message), message,
-                               qos, true);
+                               qos, false);
     if (rc != MOSQ_ERR_SUCCESS) {
       printf("error sending message to broker");
       mosquitto_disconnect(publisher);
       mosquitto_destroy(publisher);
       mosquitto_lib_cleanup();
+      return -1;
     }
   }
 
+  sleep(10);
   printf("done sending meesages!");
 
   mosquitto_disconnect(publisher);
