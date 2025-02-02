@@ -1,25 +1,17 @@
 #include <mosquitto.h>
 #include <stdio.h>
-#include <string.h>
+#include <unistd.h>
 
-const char *topic = "test/topic";
-const char *message = "{ \"json\": \"test\" }";
-int qos = 1;
-int keepalive = 60;
+#define MESSAGE_TO_SENT 10
+#define BATCH_SIZE 100
+
+const char message[] = "{ \"json\": \"test\" }";
+const char topic[] = "test/topic";
+const int qos = 1;
 
 int received_counter = 0;
 
-void on_message_print(struct mosquitto *client, void *userdata,
-                      const struct mosquitto_message *msg) {
-  printf("received message!: \n");
-  if (msg->payloadlen) {
-    printf("%s\n", (char *)msg->payload);
-  } else {
-    printf("empty message!");
-  }
-
-  fflush(stdout);
-}
+struct mosquitto *consumer = {};
 
 void on_message_count(struct mosquitto *client, void *userdata,
                       const struct mosquitto_message *msg) {
@@ -28,9 +20,13 @@ void on_message_count(struct mosquitto *client, void *userdata,
   }
 
   received_counter = received_counter + 1;
-
   printf("%i\n", received_counter);
-  fflush(stdout);
+
+  if (received_counter == MESSAGE_TO_SENT) {
+    printf("%s\n", "done!");
+    mosquitto_disconnect(consumer);
+    fflush(stdout);
+  }
 }
 
 int main() {
@@ -39,9 +35,10 @@ int main() {
     return -1;
   }
 
-  struct mosquitto *consumer = mosquitto_new("consumer", true, NULL);
+  consumer = mosquitto_new("consumer", true, NULL);
 
   mosquitto_message_callback_set(consumer, on_message_count);
+  mosquitto_int_option(consumer, MOSQ_OPT_SEND_MAXIMUM, MESSAGE_TO_SENT);
 
   err = mosquitto_connect(consumer, "localhost", 1883, 30);
   if (err != MOSQ_ERR_SUCCESS) {
@@ -53,13 +50,19 @@ int main() {
 
   int rc = mosquitto_subscribe(consumer, NULL, topic, qos);
   if (rc != MOSQ_ERR_SUCCESS) {
-    printf("error reading message to broker");
+    printf("error subscribing to broker");
     mosquitto_disconnect(consumer);
     mosquitto_destroy(consumer);
     mosquitto_lib_cleanup();
   }
 
-  mosquitto_loop_forever(consumer, -1, 1);
+  mosquitto_loop_start(consumer);
+
+  while (received_counter < MESSAGE_TO_SENT) {
+    sleep(1);
+  }
+
+  mosquitto_loop_stop(consumer, false);
 
   mosquitto_disconnect(consumer);
   mosquitto_destroy(consumer);
