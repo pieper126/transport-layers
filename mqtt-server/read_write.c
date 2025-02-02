@@ -71,7 +71,6 @@ int main() {
   }
 
   mosquitto_loop_forever(consumer, -1, 1);
-
   mosquitto_destroy(consumer);
   mosquitto_lib_cleanup();
 }
