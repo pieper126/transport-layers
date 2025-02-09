@@ -49,6 +49,7 @@ int main() {
     mosquitto_disconnect(consumer);
     mosquitto_destroy(consumer);
     mosquitto_lib_cleanup();
+    return 1;
   }
 
   int rc = mosquitto_subscribe(consumer, NULL, topic, qos);

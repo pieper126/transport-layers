@@ -5,6 +5,8 @@ import org.eclipse.jetty.io.Content.Chunk;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.websocket.api.Session.Listener;
+
 
 public class Echo {
   private ByteBufferAccumulator acc;
