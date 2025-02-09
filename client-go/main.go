@@ -16,13 +16,25 @@ const amount = 1000
 const message = `{ "json": "test" }`
 
 func main() {
-	fmt.Println("starting websocket!")
-	callingViaWebsocket()
+	if len(os.Args) != 2 {
+		fmt.Println("incorrect amount of args were given: should 1")
+		fmt.Println("options: websocket or http")
+		return
+	}
+
+	chosen_option := os.Args[1]
+	switch chosen_option {
+	case "websocket":
+		callingViaWebsocket()
+	case "http":
+		callingViaNormallHttp()
+	default:
+		fmt.Printf("allowed options: websocket or http")
+	}
 }
 
 func callingViaWebsocket() {
-	conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:3000/ws/echo/", nil)
-	// conn, _, err := websocket.DefaultDialer.Dial("wss://echo.websocket.org/", nil)
+	conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:3000/ctx/echo", nil)
 	if err != nil {
 		fmt.Printf("err occurred: %e", err)
 		return
@@ -42,7 +54,7 @@ func callingViaWebsocket() {
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err != nil {
-				fmt.Printf("err occurred: %e", err)
+				fmt.Printf("err occurred during ReadMessage: %e", err)
 				return
 			}
 			fmt.Println("Received: ", string(msg))
@@ -62,7 +74,6 @@ func callingViaWebsocket() {
 			return
 		}
 	}
-
 }
 
 func callingViaNormallHttp() {

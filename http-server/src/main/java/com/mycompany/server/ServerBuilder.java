@@ -23,15 +23,15 @@ public class ServerBuilder {
 
     final var mainHandler = new Handler.Sequence();
 
-    // server.setHandler(mainHandler);
+    server.setHandler(mainHandler);
 
     ContextHandler contextHandler = new ContextHandler("/ctx");
-    server.setHandler(contextHandler);
+    // server.setHandler(contextHandler);
 
-    // Create a WebSocketUpgradeHandler that implicitly creates a ServerWebSocketContainer.
+    // Create a WebSocketUpgradeHandler that implicitly creates a
+    // ServerWebSocketContainer.
 
-    WebSocketUpgradeHandler webSocketHandler = WebSocketUpgradeHandler.from(server, contextHandler, container ->
-    {
+    WebSocketUpgradeHandler webSocketHandler = WebSocketUpgradeHandler.from(server, contextHandler, container -> {
       // Configure the ServerWebSocketContainer.
       container.setMaxTextMessageSize(128 * 1024);
 
@@ -43,10 +43,11 @@ public class ServerBuilder {
     });
     contextHandler.setHandler(webSocketHandler);
 
-    // mainHandler.addHandler(new ContextHandler(new EchoHandler(), "/echo"));
-    // mainHandler.addHandler(new ContextHandler(new SimpleHandler(), "/health"));
-    // mainHandler.addHandler(new ContextHandler(new SimpleHandler(), "/ready"));
-    // mainHandler.addHandler(new ContextHandler(new SimpleHandler(), ""));
+    mainHandler.addHandler(contextHandler);
+    mainHandler.addHandler(new ContextHandler(new EchoHandler(), "/echo"));
+    mainHandler.addHandler(new ContextHandler(new SimpleHandler(), "/health"));
+    mainHandler.addHandler(new ContextHandler(new SimpleHandler(), "/ready"));
+    mainHandler.addHandler(new ContextHandler(new SimpleHandler(), ""));
 
     return server;
   }
