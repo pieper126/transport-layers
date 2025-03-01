@@ -66,22 +66,27 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  printf("listening for connections...\n");
-  struct sockaddr client_addr = {0};
-  socklen_t client_len = sizeof(client_addr);
-  int connected_socket =
-      accept(socket_fd, (struct sockaddr *)&client_addr, &client_len);
-  if (connected_socket < 0) {
-    perror("error accepting socket connection!");
-    close(socket_fd);
-    return 1;
+  for (;;) {
+    printf("listening for new connection!\n");
+
+    struct sockaddr client_addr = {0};
+    socklen_t client_len = sizeof(client_addr);
+    int connected_socket =
+        accept(socket_fd, (struct sockaddr *)&client_addr, &client_len);
+
+    if (connected_socket < 0) {
+      perror("error accepting socket connection!");
+      close(socket_fd);
+      return 1;
+    }
+
+    printf("accepted connection!\n");
+
+    handle_connection(connected_socket, buffer);
+
+    close(connected_socket);
   }
 
-  printf("accepted connection!\n");
-
-  handle_connection(connected_socket, buffer);
-
-  close(connected_socket);
   close(socket_fd);
 
   return 0;
