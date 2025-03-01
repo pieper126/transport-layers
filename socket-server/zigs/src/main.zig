@@ -8,11 +8,13 @@ pub fn main() !void {
     const writer = connection.writer();
 
     var buffer: [1024]u8 = undefined;
+    @memset(&buffer, 0);
+
     const message = "{ \"json\": \"test\" }";
 
-    while (true) {
-        try writer.writeAll(message);
-        _ = try reader.readAll(&buffer);
-        std.debug.print("{s}", .{buffer});
-    }
+    try writer.writeAll(message);
+    _ = try reader.readAll(&buffer);
+    std.debug.print("{s}", .{buffer});
+
+    return;
 }

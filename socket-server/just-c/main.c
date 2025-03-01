@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
 
   printf("data received\n");
   printf("%s", buffer);
+  printf("res_len: %ld", res_len);
 
   send(connected_socket, buffer, res_len, 0);
 

@@ -3,3 +3,6 @@
 
 client/zig-out/
 client/.zig-cache/
+
+socket-server/zigs/.zig-cache
+socket-server/zigs/zig-out/
