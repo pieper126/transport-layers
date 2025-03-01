@@ -14,6 +14,26 @@
 
 const int yes = 1;
 
+int handle_connection(int connected_socket, char *buffer) {
+  for (;;) {
+    ssize_t res_len = recv(connected_socket, buffer, MAX_BUFFER, 0);
+    if (res_len < 0) {
+      perror("error reading message");
+      return 1;
+    } else if (res_len == 0) {
+      printf("socket closed!");
+      fflush(stdout);
+      return 0;
+    }
+
+    printf("data received\n");
+    printf("%s", buffer);
+    printf("res_len: %ld", res_len);
+
+    send(connected_socket, buffer, res_len, 0);
+  }
+}
+
 int main(int argc, char *argv[]) {
   int socket_fd;
   struct sockaddr_in address;
@@ -47,7 +67,6 @@ int main(int argc, char *argv[]) {
   }
 
   printf("listening for connections...\n");
-
   struct sockaddr client_addr = {0};
   socklen_t client_len = sizeof(client_addr);
   int connected_socket =
@@ -60,19 +79,7 @@ int main(int argc, char *argv[]) {
 
   printf("accepted connection!\n");
 
-  ssize_t res_len = recv(connected_socket, buffer, MAX_BUFFER, 0);
-  if (res_len < 0) {
-    perror("error reading message");
-    close(connected_socket);
-    close(socket_fd);
-    return 1;
-  }
-
-  printf("data received\n");
-  printf("%s", buffer);
-  printf("res_len: %ld", res_len);
-
-  send(connected_socket, buffer, res_len, 0);
+  handle_connection(connected_socket, buffer);
 
   close(connected_socket);
   close(socket_fd);

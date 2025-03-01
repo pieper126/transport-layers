@@ -12,9 +12,13 @@ pub fn main() !void {
 
     const message = "{ \"json\": \"test\" }";
 
-    try writer.writeAll(message);
-    _ = try reader.readAll(&buffer);
-    std.debug.print("{s}", .{buffer});
+    for (0..100) |_| {
+        try writer.writeAll(message);
+        _ = try reader.read(&buffer);
+        std.debug.print("{s}", .{buffer});
+    }
+
+    connection.close();
 
     return;
 }
